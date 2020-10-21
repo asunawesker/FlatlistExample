@@ -9,10 +9,7 @@ import useForm from '../hooks/useForm';
 
 const Entry =  ({ navigation }) => {	
 
-	const [selectedAutomobile, setSelectedAutomobile] = useState();
-	const [selectedService, setSelectedService] = useState();
-
-    const initialState = {
+	const initialState = {
         issuedDate: '',
 		type: '',
 		color: '',
@@ -35,6 +32,7 @@ const Entry =  ({ navigation }) => {
 			id: id,
 			issuedDate: issuedDate,
 			type: values.type,
+			color: values.color
         }
 
 		saveCar(JSON.stringify(valuesLocal));
@@ -95,6 +93,17 @@ const Entry =  ({ navigation }) => {
                     onPress = {() => {handleSubmit()}}
                 >
                     <Text style = {styles.textBtnEntrada}>ENTRADA</Text>
+                </TouchableOpacity> 
+            </View>
+
+			<View>
+                <TouchableOpacity 
+                    style   = {styles.btnEntrada} 
+                    onPress = {async () => {
+						AsyncStorage.clear();
+					}}
+                >
+                    <Text style = {styles.textBtnEntrada}>LIMPIAR</Text>
                 </TouchableOpacity> 
             </View>
 

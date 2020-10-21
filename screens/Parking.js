@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, FlatList, Text, TouchableOpacity  } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, StyleSheet, FlatList, Text, TouchableOpacity, RefreshControl } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 
 import ListParking from '../components/ListParking';
@@ -8,12 +8,27 @@ import ListParking from '../components/ListParking';
 const Parking = () => {
 	
 	const [carList, setCarList] = useState([]);
-	const [carValues, setCarValues] = useState();
+	const [refreshing, setRefreshing] = useState(false);
+
+	const wait = (timeout) => {
+		return new Promise((resolve) => {
+			setTimeout(resolve, timeout);
+		});
+	}
 
 	const deleteCar = (id) => {
 		const newCarList = carList.filter((car) => car.id !== id); 
 		setCarList(newCarList);
 	}
+
+	const onRefresh = useCallback(() => {
+		setRefreshing(true);
+
+		wait(200).then(() => {
+			setRefreshing(false);
+			getStorage();
+		})
+    }, [refreshing]);
 
 	const getStorage = async () => {
 		const newCar = await AsyncStorage.getItem('car');
@@ -22,49 +37,11 @@ const Parking = () => {
 		setCarList([...carList,car]);
 	}
 
-	const localStorage = async () => {
-		const newLocalList = await AsyncStorage.getItem('car');
-		const car = JSON.parse(newLocalList);
-		setCarListLocal([...carListLocal,car]);
-		console.log('Local storage '+carListLocal);
-	}
-
-	const saveExitData = async ({ item }) => {
-		const currentDay = new Date();
-		const date = String(currentDay);
-		const dateSlice = date.slice(4, -15);
-		const exitDate = String(dateSlice);
-
-		const values = {
-			issuedDate: item.issuedDate,
-			exitDate: exitDate,
-			type: item.type,
-			color: item.color,
-			plates: item.plates,
-			automobile: item.automobile,
-        	service: item.service,
-		};
-		
-		sendDataExit({values});
-	}
-
-	const sendDataExit = async ({values}) => {
-		const exitCar = JSON.stringify(values);
-		
-		try {
-			await AsyncStorage.setItem('exitCar', exitCar);
-			navigation.navigate('ExitTicket', { values	});
-		} catch (e) {
-			console.log(e);
-		}
-	}
-
 	const renderItem = ({ item }) => {
 		return(
 			<ListParking 
 				car = { item }
 				onPress = {() => {
-						saveExitData({ item });
 						deleteCar(item.id);
 					}
 				}
@@ -82,7 +59,7 @@ const Parking = () => {
 			<Text style = {styles.textEstacionamiento}>
 				ESTACIONAMIENTO
 			</Text>
-			<View>
+			{/* <View>
                 <TouchableOpacity 
                     style   = {styles.btnEntrada} 
                     onPress = {() => {
@@ -92,12 +69,14 @@ const Parking = () => {
                 >
                     <Text style = {styles.textBtnEntrada}>Obtener datos actualizados</Text>
                 </TouchableOpacity> 
-            </View>
+            </View> */}
 			<FlatList
 				data = {carList}
 				keyExtractor = {car => car.id}
 				renderItem = {renderItem}
-				style = {styles.flat}
+				refreshControl = {
+					<RefreshControl refreshing = {refreshing} onRefresh = {onRefresh}/>
+				}
 			/>
 		</View>
 	);
