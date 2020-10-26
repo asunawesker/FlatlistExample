@@ -1,13 +1,43 @@
 import { StatusBar } from 'expo-status-bar';
-import React, { useState } from 'react';
-import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
+import * as React from 'react';
+import { Text, View, StyleSheet, TouchableOpacity, Button } from 'react-native';
 import { ScrollView, TextInput, Alert } from 'react-native-gesture-handler';
 import shortid from 'shortid';
 import AsyncStorage from '@react-native-community/async-storage';
+import { Picker } from '@react-native-picker/picker';
 
 import useForm from '../hooks/useForm';
 
-const Entry =  ({ navigation }) => {	
+import { MyContext } from '../navigators/Tab';
+
+const Entry =  () => {	
+
+	const [items, setItems] = React.useState();
+	const [posts, setPosts] = React.useState([])
+	
+	React.useEffect(() => {		
+		function getCharacters() {
+			fetch('https://jsonplaceholder.typicode.com/users')
+			.then(response => response.json())
+			.then(async(data) => {				
+				setItems(data);
+				console.log('Done');
+			})
+		}
+		getCharacters();
+	},[]);
+
+	React.useEffect(() => {
+		if (!items) {
+		  return;
+		}
+	
+		const mappedPosts = items.map(({ name, email}) => ({ label: name, value: email}));
+		setPosts(mappedPosts);
+
+	  }, [items]);
+
+	const { array, setArray } = React.useContext(MyContext);
 
 	const initialState = {
         issuedDate: '',
@@ -16,15 +46,12 @@ const Entry =  ({ navigation }) => {
 	}
 	
 	const entryVehicleLocal = async ({values}) => {
-        const token = await AsyncStorage.getItem("accessToken");
 
 		const currentDay = new Date();
 		const date = String(currentDay);
 		const dateSlice = date.slice(4, -15);
         const issuedDate = String(dateSlice);
 		values.issuedDate = issuedDate;
-		
-		// entryVehicle({values, token});
 		
 		const id = shortid.generate();
 
@@ -35,17 +62,19 @@ const Entry =  ({ navigation }) => {
 			color: values.color
         }
 
-		saveCar(JSON.stringify(valuesLocal));
+		saveCar(valuesLocal);
 		
 	}
 
 	const saveCar = async (carJSON) => {
+
         try {
-			await AsyncStorage.setItem('car', carJSON);
+			setArray([...array, carJSON]);
 			console.log('Logrado');
         } catch (error) {
             console.log(error);
-        }
+		}
+		
 	}
 	
 	const onSubmit = async (values) => {
@@ -107,6 +136,24 @@ const Entry =  ({ navigation }) => {
                 </TouchableOpacity> 
             </View>
 
+			<View>
+				<Picker
+					selectedValue={posts}
+					onValueChange={item => setPosts(item)}
+				>
+					{posts.map((item,index)=> {
+						return(
+								<Picker.Item 
+									key={index} 
+									label = {item.label} 
+									value = {item.email} 
+								/>
+							)}
+						)
+					}
+				</Picker>
+			</View>
+			
 		</ScrollView>
 
 	</View>

@@ -5,36 +5,15 @@ import AsyncStorage from '@react-native-community/async-storage';
 
 import ListParking from '../components/ListParking';
 
+import { MyContext } from '../navigators/Tab';
+
 const Parking = () => {
 	
-	const [carList, setCarList] = useState([]);
-	const [refreshing, setRefreshing] = useState(false);
-
-	const wait = (timeout) => {
-		return new Promise((resolve) => {
-			setTimeout(resolve, timeout);
-		});
-	}
-
+	const { array, setArray } = React.useContext(MyContext);
+	
 	const deleteCar = (id) => {
-		const newCarList = carList.filter((car) => car.id !== id); 
-		setCarList(newCarList);
-	}
-
-	const onRefresh = useCallback(() => {
-		setRefreshing(true);
-
-		wait(200).then(() => {
-			setRefreshing(false);
-			getStorage();
-		})
-    }, [refreshing]);
-
-	const getStorage = async () => {
-		const newCar = await AsyncStorage.getItem('car');
-		const car = JSON.parse(newCar);
-		console.log(car);
-		setCarList([...carList,car]);
+		const newCarList = array.filter((car) => car.id !== id); 
+		setArray(newCarList);
 	}
 
 	const renderItem = ({ item }) => {
@@ -59,24 +38,10 @@ const Parking = () => {
 			<Text style = {styles.textEstacionamiento}>
 				ESTACIONAMIENTO
 			</Text>
-			{/* <View>
-                <TouchableOpacity 
-                    style   = {styles.btnEntrada} 
-                    onPress = {() => {
-							getStorage();
-						}
-					}
-                >
-                    <Text style = {styles.textBtnEntrada}>Obtener datos actualizados</Text>
-                </TouchableOpacity> 
-            </View> */}
 			<FlatList
-				data = {carList}
+				data = {array}
 				keyExtractor = {car => car.id}
 				renderItem = {renderItem}
-				refreshControl = {
-					<RefreshControl refreshing = {refreshing} onRefresh = {onRefresh}/>
-				}
 			/>
 		</View>
 	);
