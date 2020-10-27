@@ -5,6 +5,7 @@ import { ScrollView, TextInput, Alert } from 'react-native-gesture-handler';
 import shortid from 'shortid';
 import AsyncStorage from '@react-native-community/async-storage';
 import { Picker } from '@react-native-picker/picker';
+import axios from 'axios';
 
 import useForm from '../hooks/useForm';
 
@@ -12,30 +13,26 @@ import { MyContext } from '../navigators/Tab';
 
 const Entry =  () => {	
 
-	const [items, setItems] = React.useState();
-	const [posts, setPosts] = React.useState([])
+	const [items, setItems] = React.useState([]);
+	const [selectedValue, setSelectedValue] = React.useState(-1);
 	
-	React.useEffect(() => {		
+	React.useEffect(() => {        
 		function getCharacters() {
 			fetch('https://jsonplaceholder.typicode.com/users')
 			.then(response => response.json())
-			.then(async(data) => {				
-				setItems(data);
+			.then(async(data) => {
+				const mapArray = data.map(({ name, email }) => ({ label: name, value: email }));
+				setItems(mapArray);
 				console.log('Done');
 			})
 		}
-		getCharacters();
-	},[]);
-
-	React.useEffect(() => {
-		if (!items) {
-		  return;
+		const getCharacters2 = async () => {
+			const {data} = await axios.get('https://jsonplaceholder.typicode.com/users')
+			const mapArray = data.map(({ name, email }) => ({ label: name, value: email }));
+			setItems(mapArray);
 		}
-	
-		const mappedPosts = items.map(({ name, email}) => ({ label: name, value: email}));
-		setPosts(mappedPosts);
-
-	  }, [items]);
+		getCharacters2();
+	},[]);
 
 	const { array, setArray } = React.useContext(MyContext);
 
@@ -138,20 +135,23 @@ const Entry =  () => {
 
 			<View>
 				<Picker
-					selectedValue={posts}
-					onValueChange={item => setPosts(item)}
+					selectedValue={selectedValue}
+					onValueChange={(item, index) => setSelectedValue(item)}
 				>
-					{posts.map((item,index)=> {
+					<Picker.Item label ='Selecciona tu nombre' value = {-1}/>
+					{items.map((item,index)=> {
 						return(
 								<Picker.Item 
 									key={index} 
 									label = {item.label} 
-									value = {item.email} 
+									value = {item.value} 
 								/>
 							)}
 						)
 					}
 				</Picker>
+				<Text>{selectedValue}</Text>
+				<Button title = 'puchale' onPress = {() => console.log(items)}></Button>
 			</View>
 			
 		</ScrollView>
