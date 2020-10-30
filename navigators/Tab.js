@@ -12,11 +12,19 @@ export const MyContext = React.createContext();
 
 const TabNav = () => {
 
-    const [array, setArray] = React.useState([]);
+    const [array, setArray] = React.useState([]);   
+
+    const localInfo = async () => {
+		const value = await AsyncStorage.getItem('car');
+		if (value !== null) {
+			// We have data!!
+			console.log(value);
+		}
+	}
 
     return(
         <NavigationContainer>
-            <MyContext.Provider value = {{array, setArray}}>
+            <MyContext.Provider value = {{array, setArray, localInfo }}>
                 <Tab.Navigator initialRouteName = 'Entrada'>
                     <Tab.Screen name="Entrada" component={Entry} />
                     <Tab.Screen name="Parking" component={Parking} />

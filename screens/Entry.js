@@ -5,7 +5,6 @@ import { ScrollView, TextInput, Alert } from 'react-native-gesture-handler';
 import shortid from 'shortid';
 import AsyncStorage from '@react-native-community/async-storage';
 import { Picker } from '@react-native-picker/picker';
-import axios from 'axios';
 
 import useForm from '../hooks/useForm';
 
@@ -15,6 +14,7 @@ const Entry =  () => {
 
 	const [items, setItems] = React.useState([]);
 	const [selectedValue, setSelectedValue] = React.useState(-1);
+	const { array, setArray } = React.useContext(MyContext);
 	
 	React.useEffect(() => {        
 		function getCharacters() {
@@ -26,15 +26,8 @@ const Entry =  () => {
 				console.log('Done');
 			})
 		}
-		const getCharacters2 = async () => {
-			const {data} = await axios.get('https://jsonplaceholder.typicode.com/users')
-			const mapArray = data.map(({ name, email }) => ({ label: name, value: email }));
-			setItems(mapArray);
-		}
-		getCharacters2();
-	},[]);
-
-	const { array, setArray } = React.useContext(MyContext);
+		getCharacters();
+	},[]);	
 
 	const initialState = {
         issuedDate: '',
@@ -57,22 +50,11 @@ const Entry =  () => {
 			issuedDate: issuedDate,
 			type: values.type,
 			color: values.color
-        }
+		}
 
 		saveCar(valuesLocal);
 		
-	}
-
-	const saveCar = async (carJSON) => {
-
-        try {
-			setArray([...array, carJSON]);
-			console.log('Logrado');
-        } catch (error) {
-            console.log(error);
-		}
-		
-	}
+	}	
 	
 	const onSubmit = async (values) => {
 		try {
@@ -80,6 +62,18 @@ const Entry =  () => {
 		} catch (e) {
 			console.log(e);
 		}
+	}
+
+	const saveCar = async (car) => {
+
+        try {
+			await AsyncStorage.setItem('car', JSON.stringify(car));
+			// setArray([...array, car]);
+			console.log('Logrado');
+        } catch (error) {
+            console.log(error);
+		}
+		
 	}
 
 	const { subscribe, inputs, handleSubmit } = useForm(initialState, onSubmit);
@@ -151,7 +145,6 @@ const Entry =  () => {
 					}
 				</Picker>
 				<Text>{selectedValue}</Text>
-				<Button title = 'puchale' onPress = {() => console.log(items)}></Button>
 			</View>
 			
 		</ScrollView>

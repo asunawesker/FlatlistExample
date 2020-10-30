@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useState, useCallback } from 'react';
-import { View, StyleSheet, FlatList, Text, TouchableOpacity, RefreshControl } from 'react-native';
+import { View, StyleSheet, FlatList, Text} from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 
 import ListParking from '../components/ListParking';
@@ -9,7 +9,13 @@ import { MyContext } from '../navigators/Tab';
 
 const Parking = () => {
 	
-	const { array, setArray } = React.useContext(MyContext);
+	const { array, setArray, localInfo } = React.useContext(MyContext);
+
+	React.useEffect(() => {			
+
+		localInfo();
+		
+	},[array]);
 	
 	const deleteCar = (id) => {
 		const newCarList = array.filter((car) => car.id !== id); 
