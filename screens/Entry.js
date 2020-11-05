@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import * as React from 'react';
-import { Text, View, StyleSheet, TouchableOpacity, Button } from 'react-native';
-import { ScrollView, TextInput, Alert } from 'react-native-gesture-handler';
+import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
+import { ScrollView, TextInput } from 'react-native-gesture-handler';
 import shortid from 'shortid';
 import AsyncStorage from '@react-native-community/async-storage';
 import { Picker } from '@react-native-picker/picker';
@@ -14,7 +14,7 @@ const Entry =  () => {
 
 	const [items, setItems] = React.useState([]);
 	const [selectedValue, setSelectedValue] = React.useState(-1);
-	const { array, setArray } = React.useContext(MyContext);
+	const { array, saveCar } = React.useContext(MyContext);
 	
 	React.useEffect(() => {        
 		function getCharacters() {
@@ -64,18 +64,6 @@ const Entry =  () => {
 		}
 	}
 
-	const saveCar = async (car) => {
-
-        try {
-			await AsyncStorage.setItem('car', JSON.stringify(car));
-			// setArray([...array, car]);
-			console.log('Logrado');
-        } catch (error) {
-            console.log(error);
-		}
-		
-	}
-
 	const { subscribe, inputs, handleSubmit } = useForm(initialState, onSubmit);
 
 	return (
@@ -120,7 +108,8 @@ const Entry =  () => {
                 <TouchableOpacity 
                     style   = {styles.btnEntrada} 
                     onPress = {async () => {
-						AsyncStorage.clear();
+						await AsyncStorage.clear();
+						console.log('Awiwi')
 					}}
                 >
                     <Text style = {styles.textBtnEntrada}>LIMPIAR</Text>

@@ -9,19 +9,23 @@ import { MyContext } from '../navigators/Tab';
 
 const Parking = () => {
 	
-	const { array, setArray, localInfo } = React.useContext(MyContext);
-
-	React.useEffect(() => {			
-
-		localInfo();
-		
-	},[array]);
 	
-	const deleteCar = (id) => {
-		const newCarList = array.filter((car) => car.id !== id); 
-		setArray(newCarList);
-	}
-
+	const { array, deleteCar, setArray } = React.useContext(MyContext);	
+	
+	React.useEffect(() => {
+		const getCarsLocal = async () => {
+			try {
+				const carStorage = await AsyncStorage.getItem('carList');
+				if (carStorage) {
+					setArray(JSON.parse(carStorage));	
+				}
+			} catch (e) {
+				console.log(e);
+			}
+		}
+		getCarsLocal();
+	},[]);
+	
 	const renderItem = ({ item }) => {
 		return(
 			<ListParking 
